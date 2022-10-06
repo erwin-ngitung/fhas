@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 import numpy as np
+import openpyxl as pxl
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -220,7 +221,17 @@ def account(st, **state):
 
 
 def dashboard(st, **state):
-    
+    path_data = 'dataset/data_true.xlsx'
+    data = pxl.load_workbook(path_data)
+    sheet = data.sheetnames
+
+    select = st.selectbox("Please select your data!",
+                          sheet)
+
+    dataset = pd.read_excel(path_data,
+                            sheet_name=select)
+    st.dataframe(dataset)
+
 
 def logout(st, **state):
     st.success("Your account has been log out from this app")
@@ -238,6 +249,7 @@ app.hide_navigation = True
 
 app.add_app("Sign Up", sign_up)
 app.add_app("Login", login)
+app.add_app("Dashboard", dashboard)
 app.add_app("Report", report)
 app.add_app("Account Setting", account)
 app.add_app("Logout", logout)
