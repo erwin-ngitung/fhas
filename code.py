@@ -1,10 +1,11 @@
-import json
+import pandas as pd
 import numpy as np
 
-f = open('dataset/data_email.json')
+path_data = 'dataset/data_true.xlsx'
 
-data_email = json.load(f)
+dataset = pd.read_excel(path_data,
+                        sheet_name="Cakupan_JKN")
 
-index = np.where(np.array(data_email['email']) == 'fhas.developer@gmail.com')
+bar_data = pd.melt(dataset, id_vars=["Provinsi"])
 
-print(index[0][0])
+print(bar_data)

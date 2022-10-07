@@ -1,5 +1,7 @@
 from streamlit_multipage import MultiPage
 from utils import check_email, check_account, update_json
+from utils import visualization as vs
+import altair as alt
 from PIL import Image
 import streamlit as st
 import pandas as pd
@@ -115,15 +117,15 @@ def report(st, **state):
     with st2:
         st.image(image)
 
+    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
+                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Messages Report</h3>", unsafe_allow_html=True)
+
     restriction = state["login"]
 
     if "login" not in state or restriction == "False":
         st.warning("Please login with your registered email!")
         return
-
-    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
-                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
-    st.markdown("<h3 style=\"text-align:center;\">Messages</h3>", unsafe_allow_html=True)
 
     placeholder = st.empty()
 
@@ -156,6 +158,90 @@ def report(st, **state):
         pass
 
 
+def dashboard(st, **state):
+    # Title
+    image = Image.open("images/logo_fhas.png")
+    st1, st2, st3 = st.columns(3)
+
+    with st2:
+        st.image(image)
+
+    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
+                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Dashboard</h3>", unsafe_allow_html=True)
+
+    path_data = 'dataset/data_true.xlsx'
+    data = pxl.load_workbook(path_data)
+    sheet = data.sheetnames
+
+    select = st.selectbox("Please select your data!",
+                          sheet)
+
+    dataset = pd.read_excel(path_data,
+                            sheet_name=select)
+
+    data_years = dataset.columns.values
+
+    years = st.selectbox("Please select year do you want!",
+                         data_years[1:])
+
+    kind = st.selectbox("Please select your chart bar do you want!",
+                        ["Horizontal", "Vertical"])
+
+    chart_data = dataset.loc[:, ['Provinsi',
+                                 years]]
+
+    if kind == "Horizontal":
+        st.altair_chart(vs.get_bar_horizontal(chart_data,
+                                              "Provinsi",
+                                              str("Grafik " + " '" + select + "' di tahun " + str(years))))
+    elif kind == "Vertical":
+        st.altair_chart(vs.get_bar_vertical(chart_data,
+                                            "Provinsi",
+                                            str("Grafik " + " '" + select + "' di tahun " + str(years))))
+
+
+def insight(st, **state):
+    # Title
+    image = Image.open("images/logo_fhas.png")
+    st1, st2, st3 = st.columns(3)
+
+    with st2:
+        st.image(image)
+
+    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
+                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Insight</h3>", unsafe_allow_html=True)
+
+    restriction = state["login"]
+
+    if "login" not in state or restriction == "False":
+        st.warning("Please login with your registered email!")
+        return
+
+    path_data = 'dataset/data_true.xlsx'
+    data = pxl.load_workbook(path_data)
+    sheet = data.sheetnames
+
+    st1, st2 = st.columns(2)
+
+    with st1:
+        select = st.selectbox("Please select your data!",
+                              sheet)
+
+        dataset = pd.read_excel(path_data,
+                                sheet_name=select)
+
+        data_province = dataset['Provinsi'].values
+
+        label = st.selectbox("Please select province do you want!",
+                             data_province)
+
+    with st2:
+        data_chart = dataset[dataset['Provinsi'] == label]
+        st.dataframe(data_chart)
+
+
 def account(st, **state):
     # Title
     image = Image.open("images/logo_fhas.png")
@@ -164,16 +250,16 @@ def account(st, **state):
     with st2:
         st.image(image)
 
+    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
+                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Account Setting</h3>", unsafe_allow_html=True)
+
     restriction = state["login"]
     password = state["password"]
 
     if "login" not in state or restriction == "False":
         st.warning("Please login with your registered email!")
         return
-
-    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
-                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
-    st.markdown("<h3 style=\"text-align:center;\">Account Setting</h3>", unsafe_allow_html=True)
 
     placeholder = st.empty()
 
@@ -220,19 +306,6 @@ def account(st, **state):
         pass
 
 
-def dashboard(st, **state):
-    path_data = 'dataset/data_true.xlsx'
-    data = pxl.load_workbook(path_data)
-    sheet = data.sheetnames
-
-    select = st.selectbox("Please select your data!",
-                          sheet)
-
-    dataset = pd.read_excel(path_data,
-                            sheet_name=select)
-    st.dataframe(dataset)
-
-
 def logout(st, **state):
     st.success("Your account has been log out from this app")
     MultiPage.save({"login": "False"})
@@ -250,6 +323,7 @@ app.hide_navigation = True
 app.add_app("Sign Up", sign_up)
 app.add_app("Login", login)
 app.add_app("Dashboard", dashboard)
+app.add_app("Insight", insight)
 app.add_app("Report", report)
 app.add_app("Account Setting", account)
 app.add_app("Logout", logout)
