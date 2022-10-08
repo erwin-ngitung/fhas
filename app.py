@@ -1,16 +1,13 @@
 from streamlit_multipage import MultiPage
 from utils import check_email, check_account, update_json
 from utils import visualization as vs
-import altair as alt
 from PIL import Image
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import time
 import numpy as np
 import openpyxl as pxl
+from streamlit_folium import st_folium
 import warnings
-
 warnings.filterwarnings("ignore")
 
 
@@ -186,19 +183,33 @@ def dashboard(st, **state):
                          data_years[1:])
 
     kind = st.selectbox("Please select your chart bar do you want!",
-                        ["Horizontal", "Vertical"])
+                        ["Horizontal Bar Chart",
+                         "Vertical Bar Chart",
+                         "Map Geospatial"])
 
     chart_data = dataset.loc[:, ['Provinsi',
                                  years]]
+    titles = str("Grafik " + " '" + select + "' di tahun " + str(years))
 
-    if kind == "Horizontal":
+    if kind == "Vertical Bar Chart":
         st.altair_chart(vs.get_bar_horizontal(chart_data,
                                               "Provinsi",
-                                              str("Grafik " + " '" + select + "' di tahun " + str(years))))
-    elif kind == "Vertical":
+                                              titles))
+    elif kind == "Horizontal Bar Chart":
         st.altair_chart(vs.get_bar_vertical(chart_data,
                                             "Provinsi",
-                                            str("Grafik " + " '" + select + "' di tahun " + str(years))))
+                                            titles))
+    elif kind == "Map Geospatial":
+        # maps = vs.get_folium_map(chart_data,
+        #                          years)
+        # st_folium(maps)
+
+        fig, ax = vs.get_chart_map(chart_data,
+                                   years,
+                                   titles,
+                                   'Kementrian Informasi dan Komunikasi')
+
+        st.pyplot(fig)
 
 
 def insight(st, **state):

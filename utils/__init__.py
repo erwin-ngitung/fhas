@@ -1,8 +1,10 @@
 import re
 import warnings
-import altair as alt
 import json
 import numpy as np
+from osgeo import ogr
+import geopandas as gpd
+import subprocess
 warnings.filterwarnings("ignore")
 
 
@@ -66,3 +68,40 @@ def check_email(email):
         value = "invalid email"
 
     return value
+
+
+def change_province(data):
+    data.rename(columns={"PROVINSI": "Provinsi"},
+                inplace=True)
+
+    data['Provinsi'] = data['Provinsi'].str.title()
+
+    data['Provinsi'] = data['Provinsi'].replace(['Daerah Istimewa Yogyakarta', 'Dki Jakarta',
+                                                 'Kepulauan Bangka Belitung', 'Kepulauan Riau'],
+                                                ['DI Yogyakarta', 'DKI Jakarta',
+                                                 'Kep. Bangka Belitung', 'Kep. Riau'])
+
+    return data
+
+
+def change_json(path):
+    driver = ogr.GetDriverByName('ESRI Shapefile')
+    shp_path = path
+    data_source = driver.Open(shp_path, 0)
+
+    fc = {
+        'type': 'FeatureCollection',
+        'features': []
+    }
+
+    lyr = data_source.GetLayer(0)
+    for feature in lyr:
+        fc['features'].append(feature.ExportToJson(as_object=True))
+
+    with open('dataset/Indonesia_SHP.json', 'w') as f:
+        json.dump(fc, f)
+
+    data_json = gpd.read_file('dataset/Indonesia_SHP.json')
+
+    return data_json
+
