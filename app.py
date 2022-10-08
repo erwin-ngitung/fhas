@@ -189,16 +189,27 @@ def dashboard(st, **state):
 
     chart_data = dataset.loc[:, ['Provinsi',
                                  years]]
+
+    chart_datas = pd.melt(chart_data, id_vars=["Provinsi"])
+
     titles = str("Grafik " + " '" + select + "' di tahun " + str(years))
 
     if kind == "Vertical Bar Chart":
-        st.altair_chart(vs.get_bar_horizontal(chart_data,
+        st.altair_chart(vs.get_bar_vertical(chart_datas,
+                                            "Provinsi",
+                                            "value",
+                                            "variable",
+                                            "Provinsi",
+                                            "Value",
+                                            titles))
+    elif kind == "Horizontal Bar Chart":
+        st.altair_chart(vs.get_bar_horizontal(chart_datas,
+                                              "value",
+                                              "Provinsi",
+                                              "variable",
+                                              "Value",
                                               "Provinsi",
                                               titles))
-    elif kind == "Horizontal Bar Chart":
-        st.altair_chart(vs.get_bar_vertical(chart_data,
-                                            "Provinsi",
-                                            titles))
     elif kind == "Map Geospatial":
         # maps = vs.get_folium_map(chart_data,
         #                          years)
@@ -207,7 +218,7 @@ def dashboard(st, **state):
         fig, ax = vs.get_chart_map(chart_data,
                                    years,
                                    titles,
-                                   'Kementrian Informasi dan Komunikasi')
+                                   'Kementrian Keuangan')
 
         st.pyplot(fig)
 
@@ -234,23 +245,31 @@ def insight(st, **state):
     data = pxl.load_workbook(path_data)
     sheet = data.sheetnames
 
-    st1, st2 = st.columns(2)
+    dataset1 = pd.read_excel(path_data,
+                             sheet_name=sheet[0])
 
-    with st1:
-        select = st.selectbox("Please select your data!",
-                              sheet)
+    data_province = dataset1['Provinsi'].values
 
-        dataset = pd.read_excel(path_data,
-                                sheet_name=select)
+    label = st.selectbox("Please select province do you want!",
+                         data_province)
 
-        data_province = dataset['Provinsi'].values
+    for column in sheet:
+        datas = pd.read_excel(path_data,
+                              sheet_name=column)
 
-        label = st.selectbox("Please select province do you want!",
-                             data_province)
+        dataset = pd.melt(datas, id_vars=["Provinsi"])
+        chart_data = dataset[dataset['Provinsi'] == label]
 
-    with st2:
-        data_chart = dataset[dataset['Provinsi'] == label]
-        st.dataframe(data_chart)
+        titles = str("Grafik " + " '" + column + "' di provinsi " + label)
+
+        # st.bar_chart(data.set_index('variable'))
+        st.altair_chart(vs.get_chart_line(chart_data,
+                                          "variable",
+                                          "value",
+                                          "Provinsi",
+                                          "Years",
+                                          "Value",
+                                          titles))
 
 
 def account(st, **state):

@@ -40,7 +40,7 @@ def interactive_table(df: pd.DataFrame):
     return selection
 
 
-def get_chart_line(data, x_label, y_label, title):
+def get_chart_line(data, x_label, y_label, z_label, xlabel, ylabel, title):
     hover = alt.selection_single(
         fields=[x_label],
         nearest=True,
@@ -49,13 +49,16 @@ def get_chart_line(data, x_label, y_label, title):
     )
 
     lines = (
-        alt.Chart(data, title=title)
+        alt.Chart(data,
+                  title=title,
+                  width=700,
+                  height=500)
         .mark_line()
         .encode(
-            x=x_label,
-            y=y_label,
-            color="symbol",
-            strokeDash="symbol",
+            x=alt.X(x_label, type="nominal", title=xlabel),
+            y=alt.Y(y_label, type="quantitative", title=ylabel),
+            color=alt.Color(z_label, type="nominal", title=""),
+            order=alt.Order(z_label, sort="descending")
         )
     )
 
@@ -78,12 +81,10 @@ def get_chart_line(data, x_label, y_label, title):
         .add_selection(hover)
     )
 
-    return (lines + points + tooltips).interactive()
+    return lines.interactive()
 
 
-def get_bar_horizontal(data, x_label, title):
-    chart_data = pd.melt(data, id_vars=["Provinsi"])
-
+def get_bar_vertical(chart_data, x_label, y_label, z_label, xlabel, ylabel, title):
     hover = alt.selection_single(
         fields=[x_label],
         nearest=True,
@@ -99,10 +100,10 @@ def get_bar_horizontal(data, x_label, title):
                   height=400)
         .mark_bar()
         .encode(
-            x=alt.X(x_label, type="nominal", title=x_label),
-            y=alt.Y("value", type="quantitative", title="Value"),
-            color=alt.Color("variable", type="nominal", title=""),
-            order=alt.Order("variable", sort="descending"),
+            x=alt.X(x_label, type="nominal", title=xlabel),
+            y=alt.Y(y_label, type="quantitative", title=ylabel),
+            color=alt.Color(z_label, type="nominal", title=""),
+            order=alt.Order(z_label, sort="descending"),
         )
     )
 
@@ -115,7 +116,7 @@ def get_bar_horizontal(data, x_label, title):
             opacity=alt.condition(hover, alt.value(0.3), alt.value(0.3)),
             tooltip=[
                 alt.Tooltip(x_label, title=x_label),
-                alt.Tooltip("value", title="value"),
+                alt.Tooltip(y_label, title=y_label),
             ],
         )
         .add_selection(hover)
@@ -124,9 +125,7 @@ def get_bar_horizontal(data, x_label, title):
     return chart.interactive()
 
 
-def get_bar_vertical(data, y_label, title):
-    chart_data = pd.melt(data, id_vars=["Provinsi"])
-
+def get_bar_horizontal(chart_data, x_label, y_label, z_label, xlabel, ylabel, title):
     hover = alt.selection_single(
         fields=[y_label],
         nearest=True,
@@ -141,10 +140,10 @@ def get_bar_vertical(data, y_label, title):
                   width=700)
         .mark_bar()
         .encode(
-            x=alt.X("value", type="quantitative", title="Value"),
-            y=alt.Y(y_label, type="nominal", title="Province"),
-            color=alt.Color("variable", type="nominal", title=""),
-            order=alt.Order("variable", sort="descending"),
+            x=alt.X(x_label, type="quantitative", title=xlabel),
+            y=alt.Y(y_label, type="nominal", title=ylabel),
+            color=alt.Color(z_label, type="nominal", title=""),
+            order=alt.Order(z_label, sort="descending"),
         )
     )
 
@@ -156,7 +155,7 @@ def get_bar_vertical(data, y_label, title):
             y=y_label,
             opacity=alt.condition(hover, alt.value(0.3), alt.value(0.3)),
             tooltip=[
-                alt.Tooltip("value", title="value"),
+                alt.Tooltip(x_label, title=x_label),
                 alt.Tooltip(y_label, title=y_label),
             ],
         )
