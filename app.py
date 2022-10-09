@@ -1,11 +1,12 @@
 from streamlit_multipage import MultiPage
-from utils import check_email, check_account, update_json
+from utils import check_email, check_account, update_json, replace_json
 from utils import visualization as vs
 from PIL import Image
 import streamlit as st
 import pandas as pd
 import numpy as np
 import openpyxl as pxl
+import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
 import warnings
 warnings.filterwarnings("ignore")
@@ -192,7 +193,7 @@ def dashboard(st, **state):
 
     chart_datas = pd.melt(chart_data, id_vars=["Provinsi"])
 
-    titles = str("Grafik " + " '" + select + "' di tahun " + str(years))
+    titles = str("Graph " + " '" + select + "' in " + str(years))
 
     if kind == "Vertical Bar Chart":
         st.altair_chart(vs.get_bar_vertical(chart_datas,
@@ -233,7 +234,7 @@ def insight(st, **state):
 
     st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
                 "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
-    st.markdown("<h3 style=\"text-align:center;\">Insight</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Data Insight</h3>", unsafe_allow_html=True)
 
     restriction = state["login"]
 
@@ -252,7 +253,7 @@ def insight(st, **state):
 
     label = st.selectbox("Please select province do you want!",
                          data_province)
-
+    i = 0
     for column in sheet:
         datas = pd.read_excel(path_data,
                               sheet_name=column)
@@ -260,16 +261,122 @@ def insight(st, **state):
         dataset = pd.melt(datas, id_vars=["Provinsi"])
         chart_data = dataset[dataset['Provinsi'] == label]
 
-        titles = str("Grafik " + " '" + column + "' di provinsi " + label)
+        titles = str("Graph " + " '" + column + "'")
 
-        # st.bar_chart(data.set_index('variable'))
-        st.altair_chart(vs.get_chart_line(chart_data,
-                                          "variable",
-                                          "value",
-                                          "Provinsi",
-                                          "Years",
-                                          "Value",
-                                          titles))
+        if i % 2 == 0:
+            st1, st2 = st.columns(2)
+            with st1:
+                chart_datas = chart_data.loc[:, ["variable",
+                                                 "value"]]
+
+                chart_datas.reset_index(drop=True, inplace=True)
+
+                fig, ax = plt.subplots(1, figsize=(12, 8))
+                ax = chart_datas['value'].plot(kind='line',
+                                               marker='*', color='black', ms=10)
+                chart_datas['value'].plot(kind='bar', ax=ax,
+                                          xlim=ax.get_xlim(), ylim=ax.get_ylim())
+
+                if len(chart_datas) == 4:
+                    ax.set_xticklabels(('2018', '2019', '2020', '2021'))
+                elif len(chart_datas) == 5:
+                    ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
+
+                ax.set_title(titles)
+                ax.set_xlabel('Years')
+                ax.set_ylabel('Value')
+                st.pyplot(fig)
+
+            # st.altair_chart(vs.get_chart_line(chart_data,
+                #                                   "variable",
+                #                                   "value",
+                #                                   "Provinsi",
+                #                                   "Years",
+                #                                   "Value",
+                #                                   titles))
+        else:
+            with st2:
+                chart_datas = chart_data.loc[:, ["variable",
+                                                 "value"]]
+
+                chart_datas.reset_index(drop=True, inplace=True)
+
+                fig, ax = plt.subplots(1, figsize=(12, 8))
+                ax = chart_datas['value'].plot(kind='line',
+                                               marker='*', color='black', ms=10)
+                chart_datas['value'].plot(kind='bar', ax=ax,
+                                          xlim=ax.get_xlim(), ylim=ax.get_ylim())
+
+                if len(chart_datas) == 4:
+                    ax.set_xticklabels(('2018', '2019', '2020', '2021'))
+                elif len(chart_datas) == 5:
+                    ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
+
+                ax.set_title(titles)
+                ax.set_xlabel('Years')
+                ax.set_ylabel('Value')
+                st.pyplot(fig)
+
+                # st.altair_chart(vs.get_chart_line(chart_data,
+                #                                   "variable",
+                #                                   "value",
+                #                                   "Provinsi",
+                #                                   "Years",
+                #                                   "Value",
+                #                                   titles))
+
+        i += 1
+
+
+def exploratory_data(st, **state):
+    # Title
+    image = Image.open("images/logo_fhas.png")
+    st1, st2, st3 = st.columns(3)
+
+    with st2:
+        st.image(image)
+
+    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
+                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Exploratory Data</h3>", unsafe_allow_html=True)
+
+    restriction = state["login"]
+
+    if "login" not in state or restriction == "False":
+        st.warning("Please login with your registered email!")
+        return
+
+    path_data = 'dataset/data_true.xlsx'
+    data = pxl.load_workbook(path_data)
+    sheet = data.sheetnames
+
+    st1, st2 = st.columns(2)
+
+    with st1:
+        select1 = st.radio("Please select your data in x-axis!",
+                           sheet)
+
+    with st2:
+        select2 = st.radio("Please select your data in y-axis!",
+                           sheet)
+
+    dataset1 = pd.read_excel(path_data,
+                             sheet_name=select1)
+    dataset2 = pd.read_excel(path_data,
+                             sheet_name=select2)
+
+    column = list((set(dataset1.columns.values)
+                   .intersection(set(dataset2.columns.values))))
+
+    years = st.selectbox("Please select years do you want!",
+                         column[:len(column) - 1])
+
+    data1 = dataset1[years]
+    data2 = dataset2[years]
+
+    fig, ax, score = vs.cross_data(data1, data2, select1, select2, years)
+    st.success("The parameter " + " '" + select1 + "' and '" + select2 + "' has correlation " + str(round(score, 2)))
+    st.pyplot(fig)
 
 
 def account(st, **state):
@@ -296,6 +403,8 @@ def account(st, **state):
     st.write("Do you want to edit your account?")
     edited = st.button("Edit")
     state["edit"] = np.invert(edited)
+
+    old_email = state['email']
 
     with placeholder.form("Account"):
         name_ = state["name"] if "name" in state else ""
@@ -325,6 +434,8 @@ def account(st, **state):
                         "password": new_password,
                         "edit": True})
 
+        replace_json(name, username, old_email, email, new_password)
+
     elif save and current_password != password:
         st.success("Hi " + name + ", your profile hasn't been update successfully because your current password"
                                   " doesn't match!")
@@ -353,7 +464,8 @@ app.hide_navigation = True
 app.add_app("Sign Up", sign_up)
 app.add_app("Login", login)
 app.add_app("Dashboard", dashboard)
-app.add_app("Insight", insight)
+app.add_app("Data Insight", insight)
+app.add_app("Exploratory Data", exploratory_data)
 app.add_app("Report", report)
 app.add_app("Account Setting", account)
 app.add_app("Logout", logout)

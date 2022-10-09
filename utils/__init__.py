@@ -9,14 +9,14 @@ warnings.filterwarnings("ignore")
 
 
 def update_json(name, username, email, password):
-    data = open('dataset/data_email.json')
+    data = open('dataset/data_account.json')
 
-    data_email = json.load(data)
+    data_account = json.load(data)
 
-    name = data_email['name'] + [name]
-    username = data_email['username'] + [username]
-    email = data_email['email'] + [email]
-    password = data_email['password'] + [password]
+    name = data_account['name'] + [name]
+    username = data_account['username'] + [username]
+    email = data_account['email'] + [email]
+    password = data_account['password'] + [password]
 
     data.close()
 
@@ -25,14 +25,38 @@ def update_json(name, username, email, password):
                   'email': email,
                   'password': password}
 
-    with open('dataset/data_email.json', 'w') as json_file:
+    with open('dataset/data_account.json', 'w') as json_file:
+        json.dump(data_account, json_file)
+
+    return None
+
+
+def replace_json(name, username, old_email, new_email, password):
+    data = open('dataset/data_account.json')
+
+    data_account = json.load(data)
+
+    index = np.where(np.array(data_account['email']) == old_email)[0][0]
+    data_account['name'][index] = name
+    data_account['username'][index] = username
+    data_account['email'][index] = new_email
+    data_account['password'][index] = password
+
+    data.close()
+
+    data_email = {'name': data_account['name'],
+                  'username': data_account['username'],
+                  'email': data_account['email'],
+                  'password': data_account['password']}
+
+    with open('dataset/data_account.json', 'w') as json_file:
         json.dump(data_email, json_file)
 
     return None
 
 
 def check_account(name_email, name_password):
-    data = open('dataset/data_email.json')
+    data = open('dataset/data_account.json')
 
     data_email = json.load(data)
 
@@ -53,7 +77,7 @@ def check_account(name_email, name_password):
 
 
 def check_email(email):
-    data = open('dataset/data_email.json')
+    data = open('dataset/data_account.json')
 
     data_email = json.load(data)
 

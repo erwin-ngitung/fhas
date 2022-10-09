@@ -7,6 +7,7 @@ import altair as alt
 import geopandas as gpd
 import plotly.express as px
 import folium
+from utils import machine_learning as ml
 
 
 def interactive_table(df: pd.DataFrame):
@@ -51,8 +52,8 @@ def get_chart_line(data, x_label, y_label, z_label, xlabel, ylabel, title):
     lines = (
         alt.Chart(data,
                   title=title,
-                  width=700,
-                  height=500)
+                  width=500,
+                  height=300)
         .mark_line()
         .encode(
             x=alt.X(x_label, type="nominal", title=xlabel),
@@ -278,3 +279,20 @@ def get_folium_map(dataset, target):
     folium.LayerControl(collapsed=False).add_to(map_indo)
 
     return map_indo
+
+
+def cross_data(data1, data2, select1, select2, years):
+    y_pred, score = ml.linear_regression(data1, data2)
+
+    title = "Exploratory Data in " + str(years) + " " + "\n '" + select1 + "' and '" + select2
+
+    fig, ax = plt.subplots()
+    ax.scatter(data1.values, data2.values, alpha=1)
+    ax.plot(data1.values, y_pred, c='red')
+    ax.set_xlabel(select1, fontsize=10)
+    ax.set_ylabel(select2, fontsize=10)
+    ax.set_title(title, fontsize=10)
+    ax.grid(True)
+    fig.tight_layout()
+
+    return fig, ax, score
