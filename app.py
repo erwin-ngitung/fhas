@@ -1,6 +1,7 @@
 from streamlit_multipage import MultiPage
 from utils import check_email, check_account, update_json, replace_json
 from utils import visualization as vs
+from utils import machine_learning as ml
 from PIL import Image
 import streamlit as st
 import pandas as pd
@@ -8,6 +9,7 @@ import numpy as np
 import openpyxl as pxl
 import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
+from sklearn.preprocessing import StandardScaler
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -379,6 +381,108 @@ def exploratory_data(st, **state):
     st.pyplot(fig)
 
 
+def deployment_model(st, **state):
+    image = Image.open("images/logo_fhas.png")
+    st1, st2, st3 = st.columns(3)
+
+    with st2:
+        st.image(image)
+
+    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
+                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Deployment Model</h3>", unsafe_allow_html=True)
+
+    restriction = state["login"]
+
+    if "login" not in state or restriction == "False":
+        st.warning("Please login with your registered email!")
+        return
+
+    path_data = 'dataset/data_true.xlsx'
+    data = pxl.load_workbook(path_data)
+    sheet = data.sheetnames
+
+    try:
+        st1, st2 = st.columns(2)
+
+        with st1:
+            select = st.multiselect('Please select data do you want to build model!',
+                                    sheet)
+
+            i = 0
+            for col in select:
+                data_true = pd.read_excel(path_data,
+                                          sheet_name=col)
+
+                if i == 0:
+                    cols = set(data_true.columns.values)
+                else:
+                    cols = cols.intersection(data_true.columns.values)
+
+                i += 1
+
+        with st2:
+            years = st.selectbox('Please select years do you want!',
+                                 list(cols)[:len(cols) - 1])
+
+            data_ml = pd.DataFrame({'Provinsi': data_true['Provinsi']})
+
+            for datas in select:
+                data_excel = pd.read_excel(path_data,
+                                           sheet_name=datas)
+
+                data_ml[datas] = data_excel[years].values
+
+        st.success('Your data has been successfully saved')
+        st.dataframe(data_ml)
+
+        st.markdown("<h3 style=\"text-align:center;\">Data Cleaning and Transformation<h3>", unsafe_allow_html=True)
+
+        st3, st4 = st.columns(2)
+
+        with st3:
+            check = st.radio('Do you want to cleaning data?',
+                             ['No', 'Yes'])
+
+            if check == 'Yes':
+                data_ml.dropna(inplace=True)
+                # st.write("Table NaN Values")
+                # st.write(np.transpose(data_ml.isnull().sum()))
+
+        with st4:
+            transform = st.radio('Do you want to transform data with Standard Scaler?',
+                                 ['No', 'Yes'])
+
+            if transform == 'Yes':
+                scaler = StandardScaler()
+
+                for data_col in data_ml.columns:
+                    if data_col != 'Provinsi':
+                        data_ml[data_col] = scaler.fit_transform(data_ml[data_col].values.reshape(-1, 1))
+
+        if check == 'Yes' and transform == 'Yes':
+            st.success('Your data has been successfully cleaned and transformed')
+
+        st.dataframe(data_ml)
+
+        st.markdown("<h3 style=\"text-align:center;\">Building Model<h3>", unsafe_allow_html=True)
+
+        target = st.selectbox('Please select your target model!',
+                              select)
+
+        fig, ax, data_predict = ml.model_dbscan(data_ml, target)
+
+        st.pyplot(fig)
+
+        data_ml_true = pd.DataFrame({'Provinsi': data_true['Provinsi'].values,
+                                     'Label': data_predict})
+
+        st.dataframe(data_ml_true)
+
+    except:
+        st.error('First, please select data and years do you want!')
+
+
 def account(st, **state):
     # Title
     image = Image.open("images/logo_fhas.png")
@@ -466,6 +570,7 @@ app.add_app("Login", login)
 app.add_app("Dashboard", dashboard)
 app.add_app("Data Insight", insight)
 app.add_app("Exploratory Data", exploratory_data)
+app.add_app("Deployment Model", deployment_model)
 app.add_app("Report", report)
 app.add_app("Account Setting", account)
 app.add_app("Logout", logout)
