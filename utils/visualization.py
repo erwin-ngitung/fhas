@@ -42,13 +42,6 @@ def interactive_table(df: pd.DataFrame):
 
 
 def get_chart_line(data, x_label, y_label, z_label, xlabel, ylabel, title):
-    hover = alt.selection_single(
-        fields=[x_label],
-        nearest=True,
-        on="mouseover",
-        empty="none",
-    )
-
     lines = (
         alt.Chart(data,
                   title=title,
@@ -59,45 +52,22 @@ def get_chart_line(data, x_label, y_label, z_label, xlabel, ylabel, title):
             x=alt.X(x_label, type="nominal", title=xlabel),
             y=alt.Y(y_label, type="quantitative", title=ylabel),
             color=alt.Color(z_label, type="nominal", title=""),
-            order=alt.Order(z_label, sort="descending")
-        )
-    )
-
-    # Draw points on the line, and highlight based on selection
-    points = lines.transform_filter(hover).mark_circle(size=65)
-
-    # Draw a rule at the location of the selection
-    tooltips = (
-        alt.Chart(data)
-        .mark_rule()
-        .encode(
-            x=x_label,
-            y=y_label,
-            opacity=alt.condition(hover, alt.value(0.3), alt.value(0)),
+            order=alt.Order(z_label, sort="descending"),
             tooltip=[
                 alt.Tooltip(x_label, title=x_label),
-                alt.Tooltip(y_label, title=y_label),
-            ],
+                alt.Tooltip(y_label, title=y_label)]
         )
-        .add_selection(hover)
     )
 
     return lines.interactive()
 
 
 def get_bar_vertical(chart_data, x_label, y_label, z_label, xlabel, ylabel, title):
-    hover = alt.selection_single(
-        fields=[x_label],
-        nearest=True,
-        on="mouseover",
-        empty="none",
-    )
-
     # Horizontal stacked bar chart
     chart = (
         alt.Chart(chart_data,
                   title=title,
-                  width=700,
+                  width=800,
                   height=400)
         .mark_bar()
         .encode(
@@ -105,35 +75,17 @@ def get_bar_vertical(chart_data, x_label, y_label, z_label, xlabel, ylabel, titl
             y=alt.Y(y_label, type="quantitative", title=ylabel),
             color=alt.Color(z_label, type="nominal", title=""),
             order=alt.Order(z_label, sort="descending"),
-        )
-    )
-
-    tooltips = (
-        alt.Chart(chart_data)
-        .mark_rule()
-        .encode(
-            x=x_label,
-            y="value",
-            opacity=alt.condition(hover, alt.value(0.3), alt.value(0.3)),
             tooltip=[
                 alt.Tooltip(x_label, title=x_label),
                 alt.Tooltip(y_label, title=y_label),
-            ],
+            ]
         )
-        .add_selection(hover)
     )
 
     return chart.interactive()
 
 
 def get_bar_horizontal(chart_data, x_label, y_label, z_label, xlabel, ylabel, title):
-    hover = alt.selection_single(
-        fields=[y_label],
-        nearest=True,
-        on="mouseover",
-        empty="none",
-    )
-
     # Horizontal stacked bar chart
     chart = (
         alt.Chart(chart_data,
@@ -145,22 +97,11 @@ def get_bar_horizontal(chart_data, x_label, y_label, z_label, xlabel, ylabel, ti
             y=alt.Y(y_label, type="nominal", title=ylabel),
             color=alt.Color(z_label, type="nominal", title=""),
             order=alt.Order(z_label, sort="descending"),
-        )
-    )
-
-    tooltips = (
-        alt.Chart(chart_data)
-        .mark_rule()
-        .encode(
-            x="value",
-            y=y_label,
-            opacity=alt.condition(hover, alt.value(0.3), alt.value(0.3)),
             tooltip=[
                 alt.Tooltip(x_label, title=x_label),
                 alt.Tooltip(y_label, title=y_label),
-            ],
+            ]
         )
-        .add_selection(hover)
     )
 
     return chart.interactive()
@@ -281,18 +222,24 @@ def get_folium_map(dataset, target):
     return map_indo
 
 
-def cross_data(data1, data2, select1, select2, years):
-    y_pred, score = ml.linear_regression(data1, data2)
+def cross_data(data, select1, select2, select3, title):
+    chart = (
+        alt.Chart(data,
+                  title=title,
+                  height=600,
+                  width=700)
+        .mark_point(filled=True)
+        .encode(
+            alt.X(select1),
+            alt.Y(select2),
+            alt.Size(select3),
+            # alt.Color('Provinsi'),
+            alt.OpacityValue(0.7),
+            tooltip=[alt.Tooltip('Provinsi'),
+                     alt.Tooltip(select1),
+                     alt.Tooltip(select2),
+                     alt.Tooltip(select3)
+                     ]
+        ))
 
-    title = "Exploratory Data in " + str(years) + " " + "\n '" + select1 + "' and '" + select2
-
-    fig, ax = plt.subplots()
-    ax.scatter(data1.values, data2.values, alpha=1)
-    ax.plot(data1.values, y_pred, c='red')
-    ax.set_xlabel(select1, fontsize=10)
-    ax.set_ylabel(select2, fontsize=10)
-    ax.set_title(title, fontsize=10)
-    ax.grid(True)
-    fig.tight_layout()
-
-    return fig, ax, score
+    return chart

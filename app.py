@@ -303,7 +303,7 @@ def exploratory_data(st, **state):
     data = pxl.load_workbook(path_data)
     sheet = data.sheetnames
 
-    st1, st2 = st.columns(2)
+    st1, st2, st3 = st.columns(3)
 
     with st1:
         select1 = st.radio("Please select your data in x-axis!",
@@ -313,23 +313,36 @@ def exploratory_data(st, **state):
         select2 = st.radio("Please select your data in y-axis!",
                            sheet)
 
+    with st3:
+        select3 = st.radio("Please select your data in xy-axis!",
+                           sheet)
+
     dataset1 = pd.read_excel(path_data,
                              sheet_name=select1)
     dataset2 = pd.read_excel(path_data,
                              sheet_name=select2)
+    dataset3 = pd.read_excel(path_data,
+                             sheet_name=select3)
 
-    column = list((set(dataset1.columns.values)
-                   .intersection(set(dataset2.columns.values))))
+    column = list(((set(dataset1.columns.values)
+                    .intersection(set(dataset2.columns.values)))
+                   .intersection(set(dataset3.columns.values))))
 
     years = st.selectbox("Please select years do you want!",
                          column[:len(column) - 1])
 
-    data1 = dataset1[years]
-    data2 = dataset2[years]
+    data = pd.DataFrame({'Provinsi': dataset1['Provinsi'].values,
+                         select1: dataset1[years].values,
+                         select2: dataset2[years].values,
+                         select3: dataset3[years].values})
 
-    fig, ax, score = vs.cross_data(data1, data2, select1, select2, years)
+    title = str("Exploratory Data in " + str(years) + " " + "\n '" + select1 + "' and '" + select2)
+
+    chart = vs.cross_data(data, select1, select2, select3, title)
+    y_pred, score = ml.linear_regression(data[select1], data[select2])
+
     st.success("The parameter " + " '" + select1 + "' and '" + select2 + "' has correlation " + str(round(score, 2)))
-    st.pyplot(fig)
+    st.altair_chart(chart)
 
 
 def deployment_model(st, **state):
