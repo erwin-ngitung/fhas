@@ -2,10 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing, svm
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.manifold import TSNE
 from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
+from utils import visualization as vs
+import pandas as pd
+
+
+def all_model(kind_model):
+    model = {"Linear Regression": LinearRegression(),
+             'Logistic Regression': LogisticRegression()}
+
+    return model[kind_model]
 
 
 def linear_regression(data1, data2):
@@ -21,27 +30,9 @@ def linear_regression(data1, data2):
     return y_pred, score
 
 
-def model_tsne(data_ml, target):
-    data_ml.drop(['Provinsi'], inplace=True)
-
-    # Defining Model
-    model = TSNE(learning_rate=100)
-
-    # Fitting Model
-    transformed = model.fit_transform(data_ml.values)
-
-    # Plotting 2d t-Sne
-    x_axis = transformed[:, 0]
-    y_axis = transformed[:, 1]
-
-    fig, ax = plt.subplots(1, figsize=(12, 10))
-    ax.scatter(x_axis, y_axis, c=data_ml[target])
-
-    return fig, ax
-
-
 def model_dbscan(data_ml, target):
-    data_ml.drop(['Provinsi'], inplace=True, axis=1)
+    data_ml.drop(['Provinsi',
+                  target], inplace=True, axis=1)
 
     # Declaring Model
     dbscan = DBSCAN()
@@ -70,3 +61,46 @@ def model_dbscan(data_ml, target):
     ax.set_title('DBSCAN finds 3 clusters and Noise')
 
     return fig, ax, dbscan.labels_
+
+
+def supervised_learning(kind_model, data_ml, data_ml_proj, target, years, proj_years):
+    X = data_ml.drop(['Provinsi',
+                      target], axis=1)
+
+    y = data_ml[target]
+
+    X_proj = data_ml_proj.drop(['Provinsi',
+                                target], axis=1)
+
+    y_proj = data_ml_proj[target]
+
+    # Dropping any rows with Nan values
+    X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.2)
+
+    # Splitting the data into training and testing data
+    build_ml = all_model(kind_model)
+
+    build_ml.fit(X_train, y_train)
+    score = build_ml.score(X_test, y_test)
+
+    data_predict = build_ml.predict(X_proj.values)
+
+    data_ml_true = pd.DataFrame({'Provinsi': data_ml['Provinsi'].values,
+                                 years: data_ml[target].values,
+                                 proj_years: data_predict})
+
+    chart_datas = pd.melt(data_ml_true, id_vars=["Provinsi"])
+
+    title = "Efficiency Projection Each Provinsi in " + str(years) + " and " + str(proj_years)
+
+    chart = vs.get_bar_vertical(chart_datas,
+                                "Provinsi",
+                                "value",
+                                "variable",
+                                "Province",
+                                "Efficiency Value",
+                                title)
+
+    return chart, score, data_ml_true
+
+

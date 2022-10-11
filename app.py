@@ -8,9 +8,9 @@ import pandas as pd
 import numpy as np
 import openpyxl as pxl
 import matplotlib.pyplot as plt
-from streamlit_folium import st_folium
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 import warnings
+
 warnings.filterwarnings("ignore")
 
 
@@ -241,12 +241,12 @@ def insight(st, **state):
                 st.pyplot(fig)
 
             # st.altair_chart(vs.get_chart_line(chart_data,
-                #                                   "variable",
-                #                                   "value",
-                #                                   "Provinsi",
-                #                                   "Years",
-                #                                   "Value",
-                #                                   titles))
+            #                                   "variable",
+            #                                   "value",
+            #                                   "Provinsi",
+            #                                   "Years",
+            #                                   "Value",
+            #                                   titles))
         else:
             with st2:
                 chart_datas = chart_data.loc[:, ["variable",
@@ -360,6 +360,9 @@ def deployment_model(st, **state):
             select = st.multiselect('Please select data do you want to build model!',
                                     sheet)
 
+            target = st.selectbox('Please select your target model!',
+                                  select)
+
             i = 0
             for col in select:
                 data_true = pd.read_excel(path_data,
@@ -373,16 +376,23 @@ def deployment_model(st, **state):
                 i += 1
 
         with st2:
-            years = st.selectbox('Please select years do you want!',
-                                 list(cols)[:len(cols) - 1])
+            years_data = list(cols)[:len(cols) - 1]
+
+            years = st.selectbox('Please select years do you want to build model!',
+                                 years_data)
+
+            proj_years = st.selectbox('Please select projection years do you want to predict!',
+                                      years_data)
 
             data_ml = pd.DataFrame({'Provinsi': data_true['Provinsi']})
+            data_ml_proj = pd.DataFrame({'Provinsi': data_true['Provinsi']})
 
             for datas in select:
                 data_excel = pd.read_excel(path_data,
                                            sheet_name=datas)
 
                 data_ml[datas] = data_excel[years].values
+                data_ml_proj[datas] = data_excel[proj_years].values
 
         st.success('Your data has been successfully saved')
         st.dataframe(data_ml)
@@ -401,15 +411,16 @@ def deployment_model(st, **state):
                 # st.write(np.transpose(data_ml.isnull().sum()))
 
         with st4:
-            transform = st.radio('Do you want to transform data with Standard Scaler?',
+            transform = st.radio('Do you want to transform data with MaxMinScaler?',
                                  ['No', 'Yes'])
 
             if transform == 'Yes':
-                scaler = StandardScaler()
+                scaler = MinMaxScaler()
 
                 for data_col in data_ml.columns:
-                    if data_col != 'Provinsi':
+                    if data_col != 'Provinsi' and data_col != target:
                         data_ml[data_col] = scaler.fit_transform(data_ml[data_col].values.reshape(-1, 1))
+                        data_ml_proj[data_col] = scaler.fit_transform(data_ml_proj[data_col].values.reshape(-1, 1))
 
         if check == 'Yes' and transform == 'Yes':
             st.success('Your data has been successfully cleaned and transformed')
@@ -418,17 +429,43 @@ def deployment_model(st, **state):
 
         st.markdown("<h3 style=\"text-align:center;\">Building Model<h3>", unsafe_allow_html=True)
 
-        target = st.selectbox('Please select your target model!',
-                              select)
+        models = st.selectbox('Please select your kind model machine_learning!',
+                              ['Supervised Learning',
+                               'Clustering',
+                               'Unsupervised Learning'])
 
-        fig, ax, data_predict = ml.model_dbscan(data_ml, target)
+        box = []
 
-        st.pyplot(fig)
+        if models == 'Supervised Learning':
+            box = ['Linear Regression',
+                   'Logistic Distribution',
+                   'SVR',
+                   'Decision Tree Regression']
 
-        data_ml_true = pd.DataFrame({'Provinsi': data_true['Provinsi'].values,
-                                     'Label': data_predict})
+        elif models == 'Clustering':
+            box = ['KK-Neighbours',
+                   'K-Means',
+                   'Decision Tree Classifier']
 
-        st.dataframe(data_ml_true)
+        elif models == 'Unsupervised Learning':
+            box = ['CNN',
+                   'LSTM']
+
+        kind_model = st.selectbox('Please select your model machine_learning!',
+                                  box)
+
+        chart, score, dataset = ml.supervised_learning(kind_model,
+                                                       data_ml,
+                                                       data_ml_proj,
+                                                       target,
+                                                       years,
+                                                       proj_years)
+
+        st.success('Your model has accuracy ' + str(round(score, 2)))
+
+        st.altair_chart(chart)
+
+        # st.dataframe(dataset)
 
     except:
         st.error('First, please select data and years do you want!')
