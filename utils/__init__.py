@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 
 
 def update_json(name, username, email, password):
-    data = open('dataset/data_account.json')
+    data = open('data/data_account.json')
 
     data_account = json.load(data)
 
@@ -25,14 +25,14 @@ def update_json(name, username, email, password):
                   'email': email,
                   'password': password}
 
-    with open('dataset/data_account.json', 'w') as json_file:
+    with open('data/data_account.json', 'w') as json_file:
         json.dump(data_account, json_file)
 
     return None
 
 
 def replace_json(name, username, old_email, new_email, password):
-    data = open('dataset/data_account.json')
+    data = open('data/data_account.json')
 
     data_account = json.load(data)
 
@@ -49,14 +49,14 @@ def replace_json(name, username, old_email, new_email, password):
                   'email': data_account['email'],
                   'password': data_account['password']}
 
-    with open('dataset/data_account.json', 'w') as json_file:
+    with open('data/data_account.json', 'w') as json_file:
         json.dump(data_email, json_file)
 
     return None
 
 
 def check_account(name_email, name_password):
-    data = open('dataset/data_account.json')
+    data = open('data/data_account.json')
 
     data_email = json.load(data)
 
@@ -77,7 +77,7 @@ def check_account(name_email, name_password):
 
 
 def check_email(email):
-    data = open('dataset/data_account.json')
+    data = open('data/data_account.json')
 
     data_email = json.load(data)
 
@@ -122,10 +122,10 @@ def change_json(path):
     for feature in lyr:
         fc['features'].append(feature.ExportToJson(as_object=True))
 
-    with open('dataset/Indonesia_SHP.json', 'w') as f:
+    with open('data/Indonesia_SHP.json', 'w') as f:
         json.dump(fc, f)
 
-    data_json = gpd.read_file('dataset/Indonesia_SHP.json')
+    data_json = gpd.read_file('data/Indonesia_SHP.json')
 
     return data_json
 

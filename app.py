@@ -170,7 +170,7 @@ def dashboard(st, **state):
                 "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
     st.markdown("<h3 style=\"text-align:center;\">Dashboard</h3>", unsafe_allow_html=True)
 
-    path_data = 'dataset/data_true.xlsx'
+    path_data = 'data/data_true.xlsx'
     data = pxl.load_workbook(path_data)
     sheet = data.sheetnames
 
@@ -244,7 +244,7 @@ def insight(st, **state):
         st.warning("Please login with your registered email!")
         return
 
-    path_data = 'dataset/data_true.xlsx'
+    path_data = 'data/data_true.xlsx'
     data = pxl.load_workbook(path_data)
     sheet = data.sheetnames
 
@@ -348,7 +348,7 @@ def exploratory_data(st, **state):
         st.warning("Please login with your registered email!")
         return
 
-    path_data = 'dataset/data_true.xlsx'
+    path_data = 'data/data_true.xlsx'
     data = pxl.load_workbook(path_data)
     sheet = data.sheetnames
 
@@ -398,7 +398,7 @@ def deployment_model(st, **state):
         st.warning("Please login with your registered email!")
         return
 
-    path_data = 'dataset/data_true.xlsx'
+    path_data = 'data/data_true.xlsx'
     data = pxl.load_workbook(path_data)
     sheet = data.sheetnames
 

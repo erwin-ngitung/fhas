@@ -167,7 +167,7 @@ def get_bar_horizontal(chart_data, x_label, y_label, z_label, xlabel, ylabel, ti
 
 
 def get_chart_map(dataset, target, title, source):
-    file_geo = 'dataset/Indonesia/BATAS_PROVINSI_DESEMBER_2019_DUKCAPIL.shp'
+    file_geo = 'data/Indonesia/BATAS_PROVINSI_DESEMBER_2019_DUKCAPIL.shp'
     df_geo = gpd.read_file(file_geo)
     df_geo = change_province(df_geo)
 
