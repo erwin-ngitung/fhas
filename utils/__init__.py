@@ -2,7 +2,7 @@ import re
 import warnings
 import json
 import numpy as np
-from osgeo import ogr
+import ogr
 import geopandas as gpd
 import subprocess
 warnings.filterwarnings("ignore")

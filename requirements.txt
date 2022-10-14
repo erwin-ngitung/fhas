@@ -11,3 +11,4 @@ streamlit~=1.11.0
 openpyxl~=3.0.10
 pillow~=9.2.0
 streamlit-multipage~=0.0.18
+ogr~=0.40.0
