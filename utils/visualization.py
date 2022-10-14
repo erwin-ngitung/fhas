@@ -158,8 +158,8 @@ def get_chart_map(dataset, target, title, source):
 
 
 def get_folium_map(dataset, target):
-    file_geo = r"C:\Users\Nanda\Downloads\Dataset\Indonesia_SHP.json"
-    df_geo = gpd.read_file(file_geo)
+    file_geo = "data/Indonesia/BATAS_PROVINSI_DESEMBER_2019_DUKCAPIL.shp"
+    df_geo = change_json(file_geo)
     df_geo = change_province(df_geo)
 
     df_merged = pd.merge(df_geo, dataset, on=["Provinsi"])
