@@ -2,17 +2,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing, svm
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression, BayesianRidge
+from sklearn.svm import SVR
 from sklearn.manifold import TSNE
 from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
+from sklearn.tree import DecisionTreeRegressor
 from utils import visualization as vs
 import pandas as pd
 
 
 def all_model(kind_model):
     model = {"Linear Regression": LinearRegression(),
-             'Logistic Regression': LogisticRegression()}
+             'Logistic Regression': LogisticRegression(),
+             'Bayesian Ridge Regression': BayesianRidge(),
+             'SVR': SVR(kernel='rbf'),
+             'Decision Tree Regression': DecisionTreeRegressor()}
 
     return model[kind_model]
 

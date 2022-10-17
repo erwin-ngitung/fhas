@@ -235,6 +235,7 @@ def insight(st, **state):
                 elif len(chart_datas) == 5:
                     ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
 
+                ax.grid(axis='y')
                 ax.set_title(titles)
                 ax.set_xlabel('Years')
                 ax.set_ylabel('Value')
@@ -262,6 +263,7 @@ def insight(st, **state):
                 elif len(chart_datas) == 5:
                     ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
 
+                ax.grid(axis='y')
                 ax.set_title(titles)
                 ax.set_xlabel('Years')
                 ax.set_ylabel('Value')
@@ -441,6 +443,7 @@ def deployment_model(st, **state):
         if models == 'Supervised Learning':
             box = ['Linear Regression',
                    'Logistic Regression',
+                   'Bayesian Ridge Regression',
                    'SVR',
                    'Decision Tree Regression']
 
