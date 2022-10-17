@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import preprocessing, svm
 from sklearn.model_selection import train_test_split
@@ -9,15 +10,21 @@ from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeRegressor
 from utils import visualization as vs
-import pandas as pd
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM, Conv1D
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
 
 
 def all_model(kind_model):
-    model = {"Linear Regression": LinearRegression(),
+    model = {'Linear Regression': LinearRegression(),
              'Logistic Regression': LogisticRegression(),
              'Bayesian Ridge Regression': BayesianRidge(),
              'SVR': SVR(kernel='rbf'),
-             'Decision Tree Regression': DecisionTreeRegressor()}
+             'Decision Tree Regression': DecisionTreeRegressor(),
+             'CNN': Sequential(),
+             'LSTM': Sequential()}
 
     return model[kind_model]
 
@@ -54,13 +61,13 @@ def model_dbscan(data_ml, target):
     # Plot based on Class
     for i in range(0, pca_2d.shape[0]):
         if dbscan.labels_[i] == 0:
-            c1 = ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='r', marker='+')
+            ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='r', marker='+')
         elif dbscan.labels_[i] == 1:
-            c2 = ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='g', marker='o')
+            ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='g', marker='o')
         elif dbscan.labels_[i] == 2:
-            c3 = ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='y', marker='-')
+            ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='y', marker='-')
         elif dbscan.labels_[i] == -1:
-            c4 = ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='b', marker='*')
+            ax.scatter(pca_2d[i, 0], pca_2d[i, 1], c='b', marker='*')
 
     # ax.legend()
     ax.set_title('DBSCAN finds 3 clusters and Noise')
@@ -68,7 +75,7 @@ def model_dbscan(data_ml, target):
     return fig, ax, dbscan.labels_
 
 
-def supervised_learning(kind_model, data_ml, data_ml_proj, target, years, proj_years):
+def supervised_learning(kind_model, scaler, data_ml, data_ml_proj, target, years, proj_years):
     X = data_ml.drop(['Provinsi',
                       target], axis=1)
 
@@ -94,7 +101,8 @@ def supervised_learning(kind_model, data_ml, data_ml_proj, target, years, proj_y
                                  years: data_ml[target].values,
                                  proj_years: data_predict})
 
-    chart_datas = pd.melt(data_ml_true, id_vars=["Provinsi"])
+    chart_datas = pd.melt(data_ml_true,
+                          id_vars=["Provinsi"])
 
     title1 = "Efficiency Projection Each Province in " + str(years)
     title2 = "Efficiency Projection Each Province in " + str(proj_years)
@@ -117,3 +125,86 @@ def supervised_learning(kind_model, data_ml, data_ml_proj, target, years, proj_y
 
     return chart1, chart2, score, data_ml_true
 
+
+def unsupervised_learning(kind_model, scaler, data_ml, data_ml_proj, target, years, proj_years):
+    X = data_ml.drop(['Provinsi',
+                      target], axis=1)
+
+    y = data_ml[target]
+
+    X_proj = data_ml_proj.drop(['Provinsi',
+                                target], axis=1)
+
+    y_proj = data_ml_proj[target]
+
+    # Dropping any rows with Nan values
+    X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.2)
+
+    # reshape input to be [samples, time steps, features]
+    trainX = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
+    testX = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))
+    model = Sequential()
+
+    if kind_model == "LSTM":
+        # create and fit the LSTM network
+        model.add(LSTM(4, input_shape=(1, X_train.shape[1])))
+        model.add(Dense(1))
+        model.compile(loss='mean_squared_error', optimizer='adam')
+        model.fit(trainX, y_train, epochs=100, batch_size=1, verbose=2)
+
+    elif kind_model == "CNN":
+        # create and fit the LSTM network
+        model.add(Conv1D(4, input_shape=(1, X_train.shape[1])))
+        model.add(Dense(1))
+        model.compile(loss='mean_squared_error', optimizer='adam')
+        model.fit(trainX, y_train, epochs=100, batch_size=1, verbose=2)
+
+    # make predictions
+    trainPredict = model.predict(trainX)
+    testPredict = model.predict(testX)
+
+    # invert predictions
+    trainPredict = scaler.inverse_transform(trainPredict)
+    trainY = scaler.inverse_transform([y_train])
+    testPredict = scaler.inverse_transform(testPredict)
+    testY = scaler.inverse_transform([y_test])
+
+    trainScore = np.sqrt(mean_squared_error(trainY[0], trainPredict[:, 0]))
+    testScore = np.sqrt(mean_squared_error(testY[0], testPredict[:, 0]))
+
+    X_proj = np.reshape(X_proj.values, (X_proj.shape[0], 1, X_proj.shape[1]))
+
+    data_predict = model.predict(X_proj)
+
+    datas_predict = []
+
+    for data in data_predict:
+        datas_predict.append(data[0])
+
+    data_ml_true = pd.DataFrame({'Provinsi': data_ml['Provinsi'].values,
+                                 years: data_ml[target].values,
+                                 proj_years: datas_predict})
+
+    chart_datas = pd.melt(data_ml_true,
+                          id_vars=["Provinsi"])
+
+    title1 = "Efficiency Projection Each Province in " + str(years)
+    title2 = "Efficiency Projection Each Province in " + str(proj_years)
+
+    chart1 = vs.get_bar_vertical(chart_datas[chart_datas['variable'] == years],
+                                 "Provinsi",
+                                 "value",
+                                 "variable",
+                                 "Province",
+                                 "Efficiency Value",
+                                 title1)
+
+    chart2 = vs.get_bar_vertical(chart_datas[chart_datas['variable'] == proj_years],
+                                 "Provinsi",
+                                 "value",
+                                 "variable",
+                                 "Province",
+                                 "Efficiency Value",
+                                 title2)
+
+    return chart1, chart2, trainScore, data_ml_true

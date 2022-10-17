@@ -10,7 +10,6 @@ import openpyxl as pxl
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import warnings
-
 warnings.filterwarnings("ignore")
 
 
@@ -419,7 +418,7 @@ def deployment_model(st, **state):
                                  ['No', 'Yes'])
 
             if transform == 'Yes':
-                scaler = MinMaxScaler()
+                scaler = MinMaxScaler(feature_range=(0, 1))
 
                 for data_col in data_ml.columns:
                     if data_col != 'Provinsi' and data_col != target:
@@ -433,9 +432,8 @@ def deployment_model(st, **state):
 
         st.markdown("<h3 style=\"text-align:center;\">Building Model<h3>", unsafe_allow_html=True)
 
-        models = st.selectbox('Please select your kind model machine_learning!',
+        models = st.selectbox('Please select your kind model machine learning!',
                               ['Supervised Learning',
-                               'Clustering',
                                'Unsupervised Learning'])
 
         box = []
@@ -447,29 +445,35 @@ def deployment_model(st, **state):
                    'SVR',
                    'Decision Tree Regression']
 
-        elif models == 'Clustering':
-            box = ['KK-Neighbours',
-                   'K-Means',
-                   'Decision Tree Classifier']
-
         elif models == 'Unsupervised Learning':
             box = ['CNN',
                    'LSTM']
 
-        kind_model = st.selectbox('Please select your model machine_learning!',
+        kind_model = st.selectbox('Please select your model machine learning!',
                                   box)
 
-        chart1, chart2, score, dataset = ml.supervised_learning(kind_model,
-                                                                data_ml,
-                                                                data_ml_proj,
-                                                                target,
-                                                                years,
-                                                                proj_years)
+        if models == 'Supervised Learning':
+            chart1, chart2, score, dataset = ml.supervised_learning(kind_model,
+                                                                    scaler,
+                                                                    data_ml,
+                                                                    data_ml_proj,
+                                                                    target,
+                                                                    years,
+                                                                    proj_years)
+        elif models == "Unsupervised Learning":
+            chart1, chart2, score, dataset = ml.unsupervised_learning(kind_model,
+                                                                      scaler,
+                                                                      data_ml,
+                                                                      data_ml_proj,
+                                                                      target,
+                                                                      years,
+                                                                      proj_years)
 
         st.success('Your model has accuracy ' + str(round(score, 2)))
 
         st.altair_chart(chart1)
         st.altair_chart(chart2)
+
 
     except:
         st.error('First, please select data and years do you want!')
