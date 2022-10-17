@@ -91,16 +91,24 @@ def supervised_learning(kind_model, data_ml, data_ml_proj, target, years, proj_y
 
     chart_datas = pd.melt(data_ml_true, id_vars=["Provinsi"])
 
-    title = "Efficiency Projection Each Provinsi in " + str(years) + " and " + str(proj_years)
+    title1 = "Efficiency Projection Each Province in " + str(years)
+    title2 = "Efficiency Projection Each Province in " + str(proj_years)
 
-    chart = vs.get_bar_vertical(chart_datas,
-                                "Provinsi",
-                                "value",
-                                "variable",
-                                "Province",
-                                "Efficiency Value",
-                                title)
+    chart1 = vs.get_bar_vertical(chart_datas[chart_datas['variable'] == years],
+                                 "Provinsi",
+                                 "value",
+                                 "variable",
+                                 "Province",
+                                 "Efficiency Value",
+                                 title1)
 
-    return chart, score, data_ml_true
+    chart2 = vs.get_bar_vertical(chart_datas[chart_datas['variable'] == proj_years],
+                                 "Provinsi",
+                                 "value",
+                                 "variable",
+                                 "Province",
+                                 "Efficiency Value",
+                                 title2)
 
+    return chart1, chart2, score, data_ml_true
 

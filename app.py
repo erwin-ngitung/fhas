@@ -165,10 +165,6 @@ def dashboard(st, **state):
                                               "Provinsi",
                                               titles))
     elif kind == "Map Geospatial":
-        # maps = vs.get_folium_map(chart_data,
-        #                          years)
-        # st_folium(maps)
-
         fig, ax = vs.get_chart_map(chart_data,
                                    years,
                                    titles,
@@ -230,7 +226,11 @@ def insight(st, **state):
                 chart_datas['value'].plot(kind='bar', ax=ax,
                                           xlim=ax.get_xlim(), ylim=ax.get_ylim())
 
-                if len(chart_datas) == 4:
+                if len(chart_datas) == 2:
+                    ax.set_xticklabels(('2020', '2021'))
+                elif len(chart_datas) == 3:
+                    ax.set_xticklabels(('2019', '2020', '2021'))
+                elif len(chart_datas) == 4:
                     ax.set_xticklabels(('2018', '2019', '2020', '2021'))
                 elif len(chart_datas) == 5:
                     ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
@@ -240,13 +240,6 @@ def insight(st, **state):
                 ax.set_ylabel('Value')
                 st.pyplot(fig)
 
-            # st.altair_chart(vs.get_chart_line(chart_data,
-            #                                   "variable",
-            #                                   "value",
-            #                                   "Provinsi",
-            #                                   "Years",
-            #                                   "Value",
-            #                                   titles))
         else:
             with st2:
                 chart_datas = chart_data.loc[:, ["variable",
@@ -260,7 +253,11 @@ def insight(st, **state):
                 chart_datas['value'].plot(kind='bar', ax=ax,
                                           xlim=ax.get_xlim(), ylim=ax.get_ylim())
 
-                if len(chart_datas) == 4:
+                if len(chart_datas) == 2:
+                    ax.set_xticklabels(('2020', '2021'))
+                elif len(chart_datas) == 3:
+                    ax.set_xticklabels(('2019', '2020', '2021'))
+                elif len(chart_datas) == 4:
                     ax.set_xticklabels(('2018', '2019', '2020', '2021'))
                 elif len(chart_datas) == 5:
                     ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
@@ -269,14 +266,6 @@ def insight(st, **state):
                 ax.set_xlabel('Years')
                 ax.set_ylabel('Value')
                 st.pyplot(fig)
-
-                # st.altair_chart(vs.get_chart_line(chart_data,
-                #                                   "variable",
-                #                                   "value",
-                #                                   "Provinsi",
-                #                                   "Years",
-                #                                   "Value",
-                #                                   titles))
 
         i += 1
 
@@ -306,16 +295,16 @@ def exploratory_data(st, **state):
     st1, st2, st3 = st.columns(3)
 
     with st1:
-        select1 = st.radio("Please select your data in x-axis!",
-                           sheet)
+        select1 = st.selectbox("Please select your data in x-axis!",
+                               sheet)
 
     with st2:
-        select2 = st.radio("Please select your data in y-axis!",
-                           sheet)
+        select2 = st.selectbox("Please select your data in y-axis!",
+                               sheet)
 
     with st3:
-        select3 = st.radio("Please select your data in xy-axis!",
-                           sheet)
+        select3 = st.selectbox("Please select your data in xy-axis!",
+                               sheet)
 
     dataset1 = pd.read_excel(path_data,
                              sheet_name=select1)
@@ -324,12 +313,12 @@ def exploratory_data(st, **state):
     dataset3 = pd.read_excel(path_data,
                              sheet_name=select3)
 
-    column = list(((set(dataset1.columns.values)
-                    .intersection(set(dataset2.columns.values)))
-                   .intersection(set(dataset3.columns.values))))
+    column = list(((set(dataset1.drop('Provinsi', axis=1).columns.values)
+                    .intersection(set(dataset2.drop('Provinsi', axis=1).columns.values)))
+                   .intersection(set(dataset3.drop('Provinsi', axis=1).columns.values))))
 
     years = st.selectbox("Please select years do you want!",
-                         column[:len(column) - 1])
+                         column)
 
     data = pd.DataFrame({'Provinsi': dataset1['Provinsi'].values,
                          select1: dataset1[years].values,
@@ -382,14 +371,14 @@ def deployment_model(st, **state):
                                           sheet_name=col)
 
                 if i == 0:
-                    cols = set(data_true.columns.values)
+                    cols = set(data_true.drop('Provinsi', axis=1).columns.values)
                 else:
-                    cols = cols.intersection(data_true.columns.values)
+                    cols = cols.intersection(data_true.drop('Provinsi', axis=1).columns.values)
 
                 i += 1
 
         with st2:
-            years_data = list(cols)[:len(cols) - 1]
+            years_data = list(cols)
 
             years = st.selectbox('Please select years do you want to build model!',
                                  years_data)
@@ -451,7 +440,7 @@ def deployment_model(st, **state):
 
         if models == 'Supervised Learning':
             box = ['Linear Regression',
-                   'Logistic Distribution',
+                   'Logistic Regression',
                    'SVR',
                    'Decision Tree Regression']
 
@@ -467,18 +456,17 @@ def deployment_model(st, **state):
         kind_model = st.selectbox('Please select your model machine_learning!',
                                   box)
 
-        chart, score, dataset = ml.supervised_learning(kind_model,
-                                                       data_ml,
-                                                       data_ml_proj,
-                                                       target,
-                                                       years,
-                                                       proj_years)
+        chart1, chart2, score, dataset = ml.supervised_learning(kind_model,
+                                                                data_ml,
+                                                                data_ml_proj,
+                                                                target,
+                                                                years,
+                                                                proj_years)
 
         st.success('Your model has accuracy ' + str(round(score, 2)))
 
-        st.altair_chart(chart)
-
-        # st.dataframe(dataset)
+        st.altair_chart(chart1)
+        st.altair_chart(chart2)
 
     except:
         st.error('First, please select data and years do you want!')
