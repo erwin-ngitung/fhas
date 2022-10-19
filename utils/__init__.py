@@ -129,3 +129,24 @@ def change_json(path):
 
     return data_json
 
+
+def unit_data(value):
+    unit = {'PDRB_per_Kapita': 'Rupiah',
+            'Anggaran_Kesehatan_per_Kapita': 'Rasio Persentase',
+            'Anggaran_Kesehatan': 'Rasio Persentase',
+            'Cakupan_JKN': 'Rasio Persentase',
+            'TTRS_per_1000': 'Satuan per 1000',
+            'Tenaga_Medis_per_10k_Populasi': 'Satuan per 10000',
+            'AHH': 'Usia',
+            'Total_Efisiensi': 'Rasio Persentase',
+            'Pertumbuhan_Cakupan_JKN': 'Rasio Persentase',
+            'Pertumbuhan_TTRS_per_1000': 'Rasio Persentase',
+            'Pertumbuhan_Tenaga_Medis_per_10k': 'Rasio Persentase',
+            'Pertumbuhan_AHH': 'Rasio Persentase',
+            'Efisiensi_Cakupan_JKN': 'Rasio Persentase',
+            'Efisiensi_TTRS_per_1000': 'Rasio Persentase',
+            'Efisiensi_Tenaga_Medis_per_10k': 'Rasio Persentase',
+            'Efisiensi_AHH': 'Rasio Persentase'}
+
+    return unit[value]
+

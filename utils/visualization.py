@@ -84,6 +84,55 @@ def get_bar_vertical(chart_data, x_label, y_label, z_label, xlabel, ylabel, titl
     return chart.interactive()
 
 
+def get_bar_vertical_1(chart_datas, titles):
+    chart_datas.reset_index(drop=True, inplace=True)
+
+    fig, ax = plt.subplots(1, figsize=(12, 8))
+    ax = chart_datas['value'].plot(kind='line',
+                                   marker='*', color='black', ms=10)
+    chart_datas['value'].plot(kind='bar', ax=ax,
+                              xlim=ax.get_xlim(), ylim=ax.get_ylim())
+
+    if len(chart_datas) == 2:
+        ax.set_xticklabels(('2020', '2021'))
+    elif len(chart_datas) == 3:
+        ax.set_xticklabels(('2019', '2020', '2021'))
+    elif len(chart_datas) == 4:
+        ax.set_xticklabels(('2018', '2019', '2020', '2021'))
+    elif len(chart_datas) == 5:
+        ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
+
+    ax.grid(axis='y')
+    ax.set_title(titles)
+    ax.set_xlabel('Years')
+    ax.set_ylabel('Value')
+
+    return fig, ax
+
+
+def get_bar_vertical_2(chart_data, x_label, y_label, z_label, xlabel, ylabel, title):
+    # Horizontal stacked bar chart
+    chart = (
+        alt.Chart(chart_data,
+                  title=title,
+                  width=400,
+                  height=300)
+        .mark_bar()
+        .encode(
+            x=alt.X(x_label, type="nominal", title=xlabel),
+            y=alt.Y(y_label, type="quantitative", title=ylabel),
+            color=alt.Color(z_label, type="nominal", title=""),
+            order=alt.Order(z_label, sort="descending"),
+            tooltip=[
+                alt.Tooltip(x_label, title=x_label),
+                alt.Tooltip(y_label, title=y_label),
+            ]
+        )
+    )
+
+    return chart.interactive()
+
+
 def get_bar_horizontal(chart_data, x_label, y_label, z_label, xlabel, ylabel, title):
     # Horizontal stacked bar chart
     chart = (

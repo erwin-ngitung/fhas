@@ -217,56 +217,26 @@ def insight(st, **state):
                 chart_datas = chart_data.loc[:, ["variable",
                                                  "value"]]
 
-                chart_datas.reset_index(drop=True, inplace=True)
+                fig, ax = vs.get_bar_vertical_1(chart_datas, titles)
 
-                fig, ax = plt.subplots(1, figsize=(12, 8))
-                ax = chart_datas['value'].plot(kind='line',
-                                               marker='*', color='black', ms=10)
-                chart_datas['value'].plot(kind='bar', ax=ax,
-                                          xlim=ax.get_xlim(), ylim=ax.get_ylim())
-
-                if len(chart_datas) == 2:
-                    ax.set_xticklabels(('2020', '2021'))
-                elif len(chart_datas) == 3:
-                    ax.set_xticklabels(('2019', '2020', '2021'))
-                elif len(chart_datas) == 4:
-                    ax.set_xticklabels(('2018', '2019', '2020', '2021'))
-                elif len(chart_datas) == 5:
-                    ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
-
-                ax.grid(axis='y')
-                ax.set_title(titles)
-                ax.set_xlabel('Years')
-                ax.set_ylabel('Value')
                 st.pyplot(fig)
+
+                # fig = vs.get_bar_vertical_2(chart_data, 'variable', 'value', 'Provinsi', 'Years', 'Value', titles)
+                #
+                # st.altair_chart(fig)
 
         else:
             with st2:
                 chart_datas = chart_data.loc[:, ["variable",
                                                  "value"]]
 
-                chart_datas.reset_index(drop=True, inplace=True)
+                fig, ax = vs.get_bar_vertical_1(chart_datas, titles)
 
-                fig, ax = plt.subplots(1, figsize=(12, 8))
-                ax = chart_datas['value'].plot(kind='line',
-                                               marker='*', color='black', ms=10)
-                chart_datas['value'].plot(kind='bar', ax=ax,
-                                          xlim=ax.get_xlim(), ylim=ax.get_ylim())
-
-                if len(chart_datas) == 2:
-                    ax.set_xticklabels(('2020', '2021'))
-                elif len(chart_datas) == 3:
-                    ax.set_xticklabels(('2019', '2020', '2021'))
-                elif len(chart_datas) == 4:
-                    ax.set_xticklabels(('2018', '2019', '2020', '2021'))
-                elif len(chart_datas) == 5:
-                    ax.set_xticklabels(('2017', '2018', '2019', '2020', '2021'))
-
-                ax.grid(axis='y')
-                ax.set_title(titles)
-                ax.set_xlabel('Years')
-                ax.set_ylabel('Value')
                 st.pyplot(fig)
+
+                # fig = vs.get_bar_vertical_2(chart_data, 'variable', 'value', 'Provinsi', 'Years', 'Value', titles)
+                #
+                # st.altair_chart(fig)
 
         i += 1
 
@@ -333,6 +303,42 @@ def exploratory_data(st, **state):
 
     st.success("The parameter " + " '" + select1 + "' and '" + select2 + "' has correlation " + str(round(score, 2)))
     st.altair_chart(chart)
+
+
+def efficiency_prediction(st, **state):
+    image = Image.open("images/logo_fhas.png")
+    st1, st2, st3 = st.columns(3)
+
+    with st2:
+        st.image(image)
+
+    st.markdown("<svg width=\"705\" height=\"5\"><line x1=\"0\" y1=\"2.5\" x2=\"705\" y2=\"2.5\" stroke=\"black\" "
+                "stroke-width=\"4\" fill=\"black\" /></svg>", unsafe_allow_html=True)
+    st.markdown("<h3 style=\"text-align:center;\">Efficiency Prediction</h3>", unsafe_allow_html=True)
+
+    restriction = state["login"]
+
+    if "login" not in state or restriction == "False":
+        st.warning("Please login with your registered email!")
+        return
+
+    path_data = 'data/data_true.xlsx'
+    data = pxl.load_workbook(path_data)
+    sheet = data.sheetnames
+
+    data_model = []
+    data_target = []
+
+    for col in sheet:
+        if "Efisiensi" in col:
+            data_target.append(col)
+        else:
+            data_model.append(col)
+
+    dataset = pd.read_excel(path_data,
+                            sheet_name=sheet[0])
+    province = st.selectbox('Please select your province do you want!',
+                            dataset['Provinsi'])
 
 
 def deployment_model(st, **state):
@@ -613,6 +619,7 @@ app.add_app("Login", login)
 app.add_app("Dashboard", dashboard)
 app.add_app("Data Insight", insight)
 app.add_app("Exploratory Data", exploratory_data)
+app.add_app("Efficiency Prediction", efficiency_prediction)
 app.add_app("Deployment Model", deployment_model)
 app.add_app("Report", report)
 app.add_app("Account Setting", account)
