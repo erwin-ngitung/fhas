@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import preprocessing, svm
 from sklearn.model_selection import train_test_split
+from keras.layers import Dropout, Flatten, Dense, Activation
+from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from sklearn.linear_model import LinearRegression, LogisticRegression, BayesianRidge
 from sklearn.svm import SVR
 from sklearn.manifold import TSNE
@@ -149,14 +151,26 @@ def unsupervised_learning(kind_model, scaler, data_ml, data_ml_proj, target, yea
         # create and fit the LSTM network
         model.add(LSTM(4, input_shape=(1, X_train.shape[1])))
         model.add(Dense(1))
-        model.compile(loss='mean_squared_error', optimizer='adam')
+        model.compile(loss='mean_squared_error',
+                      optimizer='adam')
         model.fit(trainX, y_train, epochs=100, batch_size=1, verbose=2)
 
-    elif kind_model == "CNN":
-        # create and fit the LSTM network
-        model.add(Conv1D(4, input_shape=(1, X_train.shape[1])))
-        model.add(Dense(1))
-        model.compile(loss='mean_squared_error', optimizer='adam')
+    elif kind_model == "ANN":
+        model.add(Dense(128,
+                        input_dim=X_train.shape[1]))
+        model.add(Dense(64,
+                        input_dim=X_train.shape[1]))
+        model.add(Flatten())
+        model.add(Dense(32))
+        model.add(Activation("relu"))
+        model.add(Dropout(0.5))
+        model.add(Dense(16))
+        model.add(Activation("relu"))
+        model.add(Dropout(0.5))
+        model.add(Dense(1,
+                        activation='softmax'))
+        model.compile(loss='mean_squared_error',
+                      optimizer='adam')
         model.fit(trainX, y_train, epochs=100, batch_size=1, verbose=2)
 
     # make predictions

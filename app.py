@@ -440,14 +440,13 @@ def deployment_model(st, **state):
 
         if models == 'Supervised Learning':
             box = ['Linear Regression',
-                   'Logistic Regression',
                    'Bayesian Ridge Regression',
                    'SVR',
                    'Decision Tree Regression']
 
         elif models == 'Unsupervised Learning':
-            box = ['CNN',
-                   'LSTM']
+            box = ['LSTM',
+                   'ANN']
 
         kind_model = st.selectbox('Please select your model machine learning!',
                                   box)
@@ -473,7 +472,6 @@ def deployment_model(st, **state):
 
         st.altair_chart(chart1)
         st.altair_chart(chart2)
-
 
     except:
         st.error('First, please select data and years do you want!')
