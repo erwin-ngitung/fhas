@@ -339,6 +339,19 @@ def efficiency_prediction(st, **state):
                             sheet_name=sheet[0])
     province = st.selectbox('Please select your province do you want!',
                             dataset['Provinsi'])
+    target_efficiency = st.selectbox('Please select your province do you want!',
+                                     data_target)
+
+    dataset_efficiency = pd.read_excel(path_data,
+                                       sheet_name=target_efficiency)
+
+    data_true = pd.melt(dataset_efficiency, id_vars=["Provinsi"])
+    chart_data = data_true[data_true['Provinsi'] == province]
+
+    titles = str("Graph " + " '" + target_efficiency + "'")
+
+    fig, ax = vs.get_bar_vertical_1(chart_data, titles)
+    st.pyplot(fig)
 
 
 def deployment_model(st, **state):

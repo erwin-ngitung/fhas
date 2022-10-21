@@ -66,7 +66,7 @@ def get_bar_vertical(chart_data, x_label, y_label, z_label, xlabel, ylabel, titl
     chart = (
         alt.Chart(chart_data,
                   title=title,
-                  width=800,
+                  width=700,
                   height=400)
         .mark_bar()
         .encode(
@@ -115,8 +115,8 @@ def get_bar_vertical_2(chart_data, x_label, y_label, z_label, xlabel, ylabel, ti
     chart = (
         alt.Chart(chart_data,
                   title=title,
-                  width=400,
-                  height=300)
+                  width=500,
+                  height=400)
         .mark_bar()
         .encode(
             x=alt.X(x_label, type="nominal", title=xlabel),
