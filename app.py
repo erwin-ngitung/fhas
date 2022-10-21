@@ -440,7 +440,7 @@ def deployment_model(st, **state):
                 scaler = MinMaxScaler(feature_range=(0, 1))
 
                 for data_col in data_ml.columns:
-                    if data_col != 'Provinsi' and data_col != target:
+                    if data_col != 'Provinsi':
                         data_ml[data_col] = scaler.fit_transform(data_ml[data_col].values.reshape(-1, 1))
                         data_ml_proj[data_col] = scaler.fit_transform(data_ml_proj[data_col].values.reshape(-1, 1))
 

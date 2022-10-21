@@ -26,7 +26,7 @@ def update_json(name, username, email, password):
                   'password': password}
 
     with open('data/data_account.json', 'w') as json_file:
-        json.dump(data_account, json_file)
+        json.dump(data_email, json_file)
 
     return None
 
