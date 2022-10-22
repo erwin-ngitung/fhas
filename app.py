@@ -326,12 +326,15 @@ def efficiency_prediction(st, **state):
     sheet = data.sheetnames
 
     data_model = []
+    data_pertumbuhan = []
     data_target = []
 
     for col in sheet:
         if "Efisiensi" in col:
             data_target.append(col)
         else:
+            if 'Pertumbuhan' in col:
+                data_pertumbuhan.append(col)
             data_model.append(col)
 
     dataset = pd.read_excel(path_data,
@@ -343,17 +346,16 @@ def efficiency_prediction(st, **state):
 
     dataset_efficiency = pd.read_excel(path_data,
                                        sheet_name=target_efficiency)
-
-    dataset_efficiency[2021] = ml.linear_regression(dataset[2019].values,
-                                                    dataset[2020].values)
+    dataset_efficiency[2021], score = ml.linear_regression(dataset_efficiency[2019].values,
+                                                           dataset_efficiency[2020].values)
 
     data_true = pd.melt(dataset_efficiency, id_vars=["Provinsi"])
     chart_data = data_true[data_true['Provinsi'] == province]
 
     titles = str("Graph " + " '" + target_efficiency + "'")
 
-    fig, ax = vs.get_bar_vertical(chart_data, 'variable', 'value', 'variable', 'Years', 'Value', titles)
-    st.pyplot(fig)
+    chart = vs.get_bar_vertical(chart_data, 'variable', 'value', 'variable', 'Years', 'Value', titles)
+    st.altair_chart(chart)
 
 
 def deployment_model(st, **state):

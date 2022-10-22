@@ -224,7 +224,7 @@ def unsupervised_learning(kind_model, scaler, data_ml, data_ml_proj, target, yea
     return chart1, chart2, trainScore, data_ml_true
 
 
-def convert_data_efficiency(path_data):
+def convert_data_efficiency(path_data, output):
     target_ALL = ['PDRB_per_Kapita',
                   'Anggaran_Kesehatan_per_Kapita',
                   'Anggaran_Kesehatan',
@@ -237,7 +237,7 @@ def convert_data_efficiency(path_data):
                   'AHH',
                   'Pertumbuhan_AHH']
 
-    output_ALL = ['Total_Efisiensi']
+    output_ALL = [output]
 
     data_prov = pd.read_excel(path_data,
                               sheet_name=target_ALL[0])
@@ -286,5 +286,30 @@ def convert_data_efficiency(path_data):
         else:
             data_true_proj[col] = dataset[2021]
 
-    return data_true_target, data_true_output, data_true_proj
+    X = data_true_target.drop(['Provinsi'], axis=1)
+    Y = data_true_output.drop(['Provinsi'], axis=1)
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X.values, Y.values, test_size=0.2)
+    scaler = MinMaxScaler(feature_range=(0, 1))
+
+    data_proj = data_true_proj.drop(['Provinsi'], axis=1)
+
+    # for data_col in data_proj.columns:
+    #     data_proj[data_col] = scaler.fit_transform(data_proj[data_col].values.reshape(-1, 1))
+
+    build_ml = LinearRegression()
+
+    build_ml.fit(X_train, Y_train)
+    score = build_ml.score(X_test, Y_test)
+    data_predict = build_ml.predict(data_proj.values)
+
+    val_predict = []
+
+    for val in data_predict:
+        val_predict.append(val[0])
+
+    data_ml = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values,
+                            2022: val_predict})
+
+    return data_ml
 
