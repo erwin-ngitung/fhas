@@ -222,3 +222,69 @@ def unsupervised_learning(kind_model, scaler, data_ml, data_ml_proj, target, yea
                                  title2)
 
     return chart1, chart2, trainScore, data_ml_true
+
+
+def convert_data_efficiency(path_data):
+    target_ALL = ['PDRB_per_Kapita',
+                  'Anggaran_Kesehatan_per_Kapita',
+                  'Anggaran_Kesehatan',
+                  'Cakupan_JKN',
+                  'Pertumbuhan_Cakupan_JKN',
+                  'TTRS_per_1000',
+                  'Pertumbuhan_TTRS_per_1000',
+                  'Tenaga_Medis_per_10k_Populasi',
+                  'Pertumbuhan_Tenaga_Medis_per10k',
+                  'AHH',
+                  'Pertumbuhan_AHH']
+
+    output_ALL = ['Total_Efisiensi']
+
+    data_prov = pd.read_excel(path_data,
+                              sheet_name=target_ALL[0])
+    data_true_1 = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values})
+    data_true_2 = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values})
+
+    for col in target_ALL:
+        dataset = pd.read_excel(path_data,
+                                sheet_name=col)
+
+        data_true_1[col] = dataset[2019]
+        data_true_2[col] = dataset[2020]
+
+    data_true_target = pd.concat([data_true_1, data_true_2])
+
+    data_prov = pd.read_excel(path_data,
+                              sheet_name=output_ALL[0])
+    data_true_1 = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values})
+    data_true_2 = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values})
+
+    for col in output_ALL:
+        dataset = pd.read_excel(path_data,
+                                sheet_name=col)
+
+        data_true_1[col] = dataset[2019]
+        data_true_2[col] = dataset[2020]
+
+    data_true_output = pd.concat([data_true_1, data_true_2])
+
+    pertumbuhan = ['Pertumbuhan_Cakupan_JKN',
+                   'Pertumbuhan_TTRS_per_1000',
+                   'Pertumbuhan_Tenaga_Medis_per10k',
+                   'Pertumbuhan_AHH']
+
+    data_prov = pd.read_excel(path_data,
+                              sheet_name=pertumbuhan[0])
+    data_true_proj = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values})
+
+    for col in target_ALL:
+        dataset = pd.read_excel(path_data,
+                                sheet_name=col)
+
+        if col in pertumbuhan:
+            data_true_proj[col] = linear_regression(dataset[2019].values,
+                                                    dataset[2020].values)
+        else:
+            data_true_proj[col] = dataset[2021]
+
+    return data_true_target, data_true_output, data_true_proj
+
