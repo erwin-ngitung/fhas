@@ -225,7 +225,7 @@ def unsupervised_learning(kind_model, scaler, data_ml, data_ml_proj, target, yea
 
 
 def convert_data_efficiency(path_data, output):
-    target_ALL = ['PDRB_per_Kapita',
+    target_ALL = ['Pendapatan_per_Kapita_per_bulan',
                   'Anggaran_Kesehatan_per_Kapita',
                   'Anggaran_Kesehatan',
                   'Cakupan_JKN',
@@ -281,8 +281,8 @@ def convert_data_efficiency(path_data, output):
                                 sheet_name=col)
 
         if col in pertumbuhan:
-            data_true_proj[col] = linear_regression(dataset[2019].values,
-                                                    dataset[2020].values)
+            data_true_proj[col], score = linear_regression(dataset[2019].values,
+                                                           dataset[2020].values)
         else:
             data_true_proj[col] = dataset[2021]
 
@@ -309,7 +309,7 @@ def convert_data_efficiency(path_data, output):
         val_predict.append(val[0])
 
     data_ml = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values,
-                            2022: val_predict})
+                            2021: val_predict})
 
     return data_ml
 

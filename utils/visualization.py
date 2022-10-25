@@ -1,6 +1,6 @@
 from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
-from utils import change_province,change_json
+from utils import change_province, change_json
 import pandas as pd
 import matplotlib.pyplot as plt
 import altair as alt

@@ -131,7 +131,7 @@ def change_json(path):
 
 
 def unit_data(value):
-    unit = {'PDRB_per_Kapita': 'Rupiah',
+    unit = {'Pendapatan_per_Kapita_per_bulan': 'Rupiah',
             'Anggaran_Kesehatan_per_Kapita': 'Rasio Persentase',
             'Anggaran_Kesehatan': 'Rasio Persentase',
             'Cakupan_JKN': 'Rasio Persentase',

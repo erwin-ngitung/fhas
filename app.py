@@ -344,6 +344,11 @@ def efficiency_prediction(st, **state):
     target_efficiency = st.selectbox('Please select your province do you want!',
                                      data_target)
 
+    data_ml = ml.convert_data_efficiency(path_data,
+                                         target_efficiency)
+
+    print(data_ml[2021])
+
     dataset_efficiency = pd.read_excel(path_data,
                                        sheet_name=target_efficiency)
     dataset_efficiency[2021], score = ml.linear_regression(dataset_efficiency[2019].values,
