@@ -347,8 +347,6 @@ def efficiency_prediction(st, **state):
     data_ml, score = ml.convert_data_efficiency(path_data,
                                                 target_efficiency)
 
-    print(score)
-
     dataset_efficiency = pd.read_excel(path_data,
                                        sheet_name=target_efficiency)
     dataset_efficiency[2021], score = ml.linear_regression(dataset_efficiency[2019].values,
