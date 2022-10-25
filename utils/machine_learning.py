@@ -311,5 +311,5 @@ def convert_data_efficiency(path_data, output):
     data_ml = pd.DataFrame({'Provinsi': data_prov['Provinsi'].values,
                             2021: val_predict})
 
-    return data_ml
+    return data_ml, score
 
